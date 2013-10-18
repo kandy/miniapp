@@ -4,23 +4,19 @@ use \Smil\ObjectManager as ObjectManager;
 class HttpFrontController
 {
     private $om;
+
     private $routing;
 
-    public function __construct(ObjectManager $om)
+    public function __construct(ObjectManager $om, RouterRegex $router)
     {
         $this->om = $om;
-        $this->routing = [
-            '/' => '\Query\HomeQuery',
-            'rest' => 'Rest',
-            'soap' => 'Soap'
-
-        ];
+        $this->routing = $router;
     }
 
     public function __invoke($context)
     {
         try {
-            $class = $this->routing[dirname($context['REQUEST_URI'])]; //@todo: RoutingLevelOne
+            $class = $this->routing->match($context);
             //@todo: context switch decorator
             // router->match -> list of classes
             //

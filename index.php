@@ -4,18 +4,25 @@ spl_autoload_register(function($class) {
         str_replace('\\', '/', $class) . '.php'
     );
 
-
-
     if ($fileName) {
         require($fileName);
-    } else {
-        $f = 'Factory';
-        $len = strlen($f);
-        if (!substr_compare($class, $f, -$len, $len)) {
-        $classParts = explode('\\',substr($class, 0, -$len));
-        $className = array_pop($classParts);
-        $namespace = implode('\\', $classParts);
-            $body = <<<CLASSBODY
+    }
+    return $fileName
+        && (
+            class_exists($class, false)
+            || interface_exists($class, false)
+            || trait_exists($class, false)
+        );
+});
+spl_autoload_register(function($class) {
+
+$f = 'Factory';
+$len = strlen($f);
+if (!substr_compare($class, $f, -$len, $len)) {
+    $classParts = explode('\\', substr($class, 0, -$len));
+    $className = array_pop($classParts);
+    $namespace = implode('\\', $classParts);
+    $body = <<<CLASSBODY
 namespace {$namespace};
 use Smil\ObjectManager;
 
@@ -25,17 +32,10 @@ class {$className}Factory
     use ObjectManager\Factory;
 }
 CLASSBODY;
-echo $body;
-eval($body);
-        }
-    }
-    return $fileName
-        && (
-            class_exists($class, false)
-            || interface_exists($class, false)
-            || trait_exists($class, false)
-        );
+    eval($body);
+}
 });
+
 
 use \Smil\ObjectManager as ObjectManager;
 
